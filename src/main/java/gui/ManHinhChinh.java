@@ -20,13 +20,13 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane; // THÊM import
+import javax.swing.JOptionPane; 
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
-import dao.NhanVien_dao; // THÊM import
-import entity.NhanVien; // THÊM import
+import dao.NhanVien_dao; 
+import entity.NhanVien; 
 
 import java.awt.CardLayout; 
 import java.awt.event.ActionEvent; 
@@ -41,10 +41,16 @@ public class ManHinhChinh {
     private BackgroundImagePanel panelTrangChu; // Màn hình chính (ảnh nền)
     
     private ManHinhQuanLyBan panelQuanLyDatBan; 
+    
+    // THÊM: Panel Quản lý Bàn Ăn
+    private QuanLyBanAn panelQuanLyBanAn;
 
     // Các biến field cho menu item
     private JMenuItem mntmDatBan; 
     private JMenuItem mntmTrangChu; 
+    
+    // THÊM: Menu item Bàn Ăn
+    private JMenuItem mntmBanAn;
 
     // THÊM: Biến để lưu trữ nhân viên đã đăng nhập
     private NhanVien nhanVienHienTai;
@@ -63,10 +69,7 @@ public class ManHinhChinh {
 
                 try {
                     // === SỬA ĐỂ TEST ===
-                    // 1. Giả lập việc đăng nhập: Lấy 1 nhân viên từ CSDL
-                    // Khi có màn hình đăng nhập, bạn sẽ lấy nhân viên từ đó
                     NhanVien_dao nvDao = NhanVien_dao.getInstance();
-                    // Lấy nhân viên 'NV001' (là 'Nguyễn Văn An' trong data)
                     NhanVien nvTest = nvDao.selectById(new NhanVien("NV001")); 
 
                     if (nvTest == null) {
@@ -75,7 +78,6 @@ public class ManHinhChinh {
                         return;
                     }
                     
-                    // 2. Truyền nhân viên đã "đăng nhập" vào ManHinhChinh
                     ManHinhChinh window = new ManHinhChinh(nvTest);
                     window.frame.setVisible(true);
                 } catch (Exception e) {
@@ -87,7 +89,6 @@ public class ManHinhChinh {
 
     /**
      * SỬA: Constructor
-     * Bây giờ nó sẽ nhận vào một NhanVien
      */
     public ManHinhChinh(NhanVien nv) {
         this.nhanVienHienTai = nv; // Lưu nhân viên lại
@@ -99,9 +100,9 @@ public class ManHinhChinh {
      */
     private void initialize() {
         frame = new JFrame();
-        // THÊM: Chào mừng nhân viên đăng nhập
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setTitle("Hệ thống Quản lý Đặt bàn - Xin chào, " + nhanVienHienTai.getTenNhanVien());
-        frame.setBounds(100, 100, 1280, 800);
+        //frame.setBounds(100, 100, 1280, 800);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null); 
 
@@ -124,9 +125,12 @@ public class ManHinhChinh {
         JMenuItem mntmKhuVuc = new JMenuItem("Khu vực");
         mntmKhuVuc.setIcon(loadIcon("/img/menu/khuVuc.png"));
         mnDanhMuc.add(mntmKhuVuc);
-        JMenuItem mntmBanAn = new JMenuItem("Bàn ăn");
+        
+        // SỬA: Gán vào field
+        mntmBanAn = new JMenuItem("Bàn ăn"); 
         mntmBanAn.setIcon(loadIcon("/img/menu/table.png"));
         mnDanhMuc.add(mntmBanAn);
+        
         JMenuItem mntmMonAn = new JMenuItem("Món ăn");
         mntmMonAn.setIcon(loadIcon("/img/menu/man.png"));
         mnDanhMuc.add(mntmMonAn);
@@ -134,7 +138,7 @@ public class ManHinhChinh {
         mntmKhachHang.setIcon(loadIcon("/img/menu/Customer.png"));
         mnDanhMuc.add(mntmKhachHang);
         JMenuItem mntmNhanVien = new JMenuItem("Nhân viên");
-        mntmNhanVien.setIcon(loadIcon("/img/menu/nhan-Vien.png"));
+        mntmNhanVien.setIcon(loadIcon("/img/menu/nhanVien.png")); // Sửa: Sửa lại tên icon
         mnDanhMuc.add(mntmNhanVien);
         JMenuItem mntmTaiKhoan = new JMenuItem("Tài khoản");
         mntmTaiKhoan.setIcon(loadIcon("/img/menu/themKhachHang.png"));
@@ -158,7 +162,7 @@ public class ManHinhChinh {
         mntmKhachHang2.setIcon(loadIcon("/img/menu/Customer.png"));
         mnTimKiem.add(mntmKhachHang2);
         JMenuItem mntmNhanVien2 = new JMenuItem("Nhân viên");
-        mntmNhanVien2.setIcon(loadIcon("/img/menu/nhan-Vien.png"));
+        mntmNhanVien2.setIcon(loadIcon("/img/menu/nhanVien.png")); // Sửa: Sửa lại tên icon
         mnTimKiem.add(mntmNhanVien2);
 
 
@@ -282,8 +286,6 @@ public class ManHinhChinh {
             public void actionPerformed(ActionEvent e) {
                 if (panelQuanLyDatBan == null) {
                     
-                    // SỬA LỖI (Dòng 266 cũ): 
-                    // Truyền 'nhanVienHienTai' (đã được lưu khi khởi tạo) vào
                     panelQuanLyDatBan = new ManHinhQuanLyBan(nhanVienHienTai); 
                     
                     mainContentPane.add(panelQuanLyDatBan, "QUAN_LY_DAT_BAN");
@@ -301,6 +303,25 @@ public class ManHinhChinh {
             public void actionPerformed(ActionEvent e) {
                 CardLayout cl = (CardLayout) (mainContentPane.getLayout());
                 cl.show(mainContentPane, "TRANG_CHU");
+            }
+        });
+        
+        // ================================================================
+        // THÊM SỰ KIỆN CLICK "BÀN ĂN" (TRONG DANH MỤC)
+        // ================================================================
+        mntmBanAn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // 1. Kiểm tra xem panel đã được tạo chưa
+                if (panelQuanLyBanAn == null) {
+                    // Nếu chưa, tạo mới
+                    panelQuanLyBanAn = new QuanLyBanAn();
+                    // Thêm vào CardLayout với một tên duy nhất
+                    mainContentPane.add(panelQuanLyBanAn, "QUAN_LY_BAN_AN");
+                } 
+
+                // 2. Lấy CardLayout và hiển thị panel
+                CardLayout cl = (CardLayout) (mainContentPane.getLayout());
+                cl.show(mainContentPane, "QUAN_LY_BAN_AN");
             }
         });
     }
@@ -353,7 +374,14 @@ public class ManHinhChinh {
             return new ImageIcon(imgURL);
         } else {
             System.err.println("Couldn't find file: " + path);
-            return null; 
+            // Sửa: Thêm icon mặc định (placeholder) để tránh lỗi NullPointer
+            // Tạo một icon vuông 16x16 màu xám
+            ImageIcon placeholder = new ImageIcon(new java.awt.image.BufferedImage(16, 16, java.awt.image.BufferedImage.TYPE_INT_RGB));
+            Graphics g = placeholder.getImage().getGraphics();
+            g.setColor(Color.GRAY);
+            g.fillRect(0, 0, 16, 16);
+            g.dispose();
+            return placeholder;
         }
     }
 }

@@ -16,7 +16,12 @@ public class KhuVuc {
     // ===== Constructors =====
     public KhuVuc() {}
 
-    public KhuVuc(String maKhuVuc, String tenKhuVuc, int soLuongBan, LoaiKhuVuc loaiKhuVuc, int sucChua, double dienTich) {
+    public KhuVuc(String tenKhuVuc) {
+		super();
+		this.tenKhuVuc = tenKhuVuc;
+	}
+
+	public KhuVuc(String maKhuVuc, String tenKhuVuc, int soLuongBan, LoaiKhuVuc loaiKhuVuc, int sucChua, double dienTich) {
         this.maKhuVuc = maKhuVuc;
         this.tenKhuVuc = tenKhuVuc;
         this.soLuongBan = soLuongBan;

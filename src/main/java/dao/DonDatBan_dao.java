@@ -294,4 +294,127 @@ public class DonDatBan_dao implements DAOInterface<DonDatBan> {
         // để đảm bảo bàn này không còn liên kết với đơn nào khác
         banAnDao.capNhatTrangThai(maBanAn, "Trống");
     }
+    
+    public DonDatBan getDonHienTaiCuaBan(String maBanAn) {
+        DonDatBan don = null;
+        String sql = """
+                SELECT TOP 1 ddb.maDonDatBan
+                FROM DonDatBan ddb
+                JOIN ChiTietDonDatBan ct ON ddb.maDonDatBan = ct.maDonDatBan
+                WHERE ct.maBanAn = ?
+                  AND ddb.thoiGianCheckOut IS NULL -- Đơn chưa thanh toán
+                  AND ddb.isActivate = 'ACTIVATE'   -- Đơn chưa bị hủy
+                ORDER BY ddb.ngayTaoDon DESC
+                """;
+
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, maBanAn);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    // Lấy đầy đủ thông tin đơn
+                    don = this.selectById(new DonDatBan(rs.getString("maDonDatBan")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return don;
+    }
+
+    /**
+     * Ghi nhận thời gian check-in cho một đơn
+     */
+    public boolean checkInDon(String maDonDatBan) {
+        String sql = "UPDATE DonDatBan SET thoiGianCheckIn = GETDATE() WHERE maDonDatBan = ?";
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, maDonDatBan);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Hủy đơn (ẩn đơn đi bằng cờ isActivate)
+     */
+    public boolean huyDon(String maDonDatBan) {
+        String sql = "UPDATE DonDatBan SET isActivate = 'DEACTIVATE' WHERE maDonDatBan = ?";
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, maDonDatBan);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Xử lý nghiệp vụ chuyển bàn (dùng transaction)
+     * @param maDonDatBan Mã đơn
+     * @param maBanCu Mã bàn cũ
+     * @param banMoi Thông tin bàn mới (để lấy tiền cọc mới)
+     * @param trangThaiCu Trạng thái của bàn cũ (ví dụ: "Đang dùng")
+     */
+    public boolean chuyenBan(String maDonDatBan, String maBanCu, BanAn banMoi, String trangThaiCu) {
+        Connection con = ConnectDB.getConnection();
+        String sqlUpdateCT = "UPDATE ChiTietDonDatBan SET maBanAn = ?, tienCoc = ? WHERE maDonDatBan = ? AND maBanAn = ?";
+        String sqlUpdateBanCu = "UPDATE BanAn SET trangThai = 'Trống' WHERE maBanAn = ?";
+        String sqlUpdateBanMoi = "UPDATE BanAn SET trangThai = ? WHERE maBanAn = ?";
+
+        try {
+            con.setAutoCommit(false); // Bắt đầu Transaction
+
+            // 1. Tính lại tiền cọc mới (nếu là đơn đặt hẹn)
+            double tienCocMoi = 0;
+            // Giả sử chỉ đơn "Đặt trước" mới có cọc, đơn "Đang dùng" không cần tính lại cọc
+            if (trangThaiCu.equals("Đặt trước") || trangThaiCu.equals("Quá hạn")) {
+                tienCocMoi = (banMoi.getLoaiBan().equalsIgnoreCase("VIP")) ? 200000 : 100000;
+            }
+
+            // 2. Cập nhật ChiTietDonDatBan: đổi mã bàn, cập nhật tiền cọc
+            try (PreparedStatement ps1 = con.prepareStatement(sqlUpdateCT)) {
+                ps1.setString(1, banMoi.getMaBanAn());
+                ps1.setDouble(2, tienCocMoi);
+                ps1.setString(3, maDonDatBan);
+                ps1.setString(4, maBanCu);
+                ps1.executeUpdate();
+            }
+
+            // 3. Cập nhật Bàn Cũ về "Trống"
+            try (PreparedStatement ps2 = con.prepareStatement(sqlUpdateBanCu)) {
+                ps2.setString(1, maBanCu);
+                ps2.executeUpdate();
+            }
+
+            // 4. Cập nhật Bàn Mới về trạng thái của bàn cũ
+            try (PreparedStatement ps3 = con.prepareStatement(sqlUpdateBanMoi)) {
+                ps3.setString(1, trangThaiCu); // (ví dụ: "Đang dùng" hoặc "Đặt trước")
+                ps3.setString(2, banMoi.getMaBanAn());
+                ps3.executeUpdate();
+            }
+
+            con.commit(); // Hoàn tất
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                con.rollback(); // Hoàn tác nếu có lỗi
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+            return false;
+        } finally {
+            try {
+                con.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
 }

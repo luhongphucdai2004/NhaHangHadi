@@ -20,13 +20,17 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane; // THÊM import
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
-import java.awt.CardLayout; // Import cần thiết
-import java.awt.event.ActionEvent; // Import cần thiết
-import java.awt.event.ActionListener; // Import cần thiết
+import dao.NhanVien_dao; // THÊM import
+import entity.NhanVien; // THÊM import
+
+import java.awt.CardLayout; 
+import java.awt.event.ActionEvent; 
+import java.awt.event.ActionListener; 
 
 public class ManHinhChinh {
 
@@ -36,12 +40,14 @@ public class ManHinhChinh {
     private JPanel mainContentPane; // Panel chính dùng CardLayout
     private BackgroundImagePanel panelTrangChu; // Màn hình chính (ảnh nền)
     
-    // SỬA LỖI 1: Sai tên lớp. Tên đúng là ManHinhQuanLyDatBan_gui
     private ManHinhQuanLyBan panelQuanLyDatBan; 
 
     // Các biến field cho menu item
     private JMenuItem mntmDatBan; 
     private JMenuItem mntmTrangChu; 
+
+    // THÊM: Biến để lưu trữ nhân viên đã đăng nhập
+    private NhanVien nhanVienHienTai;
 
     /**
      * Launch the application.
@@ -56,7 +62,21 @@ public class ManHinhChinh {
                 }
 
                 try {
-                    ManHinhChinh window = new ManHinhChinh();
+                    // === SỬA ĐỂ TEST ===
+                    // 1. Giả lập việc đăng nhập: Lấy 1 nhân viên từ CSDL
+                    // Khi có màn hình đăng nhập, bạn sẽ lấy nhân viên từ đó
+                    NhanVien_dao nvDao = NhanVien_dao.getInstance();
+                    // Lấy nhân viên 'NV001' (là 'Nguyễn Văn An' trong data)
+                    NhanVien nvTest = nvDao.selectById(new NhanVien("NV001")); 
+
+                    if (nvTest == null) {
+                        JOptionPane.showMessageDialog(null, "Không tìm thấy NV001 (Nguyễn Văn An) trong CSDL để test.\n" +
+                                "Vui lòng kiểm tra data SQL.", "Lỗi Data Test", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    
+                    // 2. Truyền nhân viên đã "đăng nhập" vào ManHinhChinh
+                    ManHinhChinh window = new ManHinhChinh(nvTest);
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -66,9 +86,11 @@ public class ManHinhChinh {
     }
 
     /**
-     * Create the application.
+     * SỬA: Constructor
+     * Bây giờ nó sẽ nhận vào một NhanVien
      */
-    public ManHinhChinh() {
+    public ManHinhChinh(NhanVien nv) {
+        this.nhanVienHienTai = nv; // Lưu nhân viên lại
         initialize();
     }
 
@@ -77,7 +99,8 @@ public class ManHinhChinh {
      */
     private void initialize() {
         frame = new JFrame();
-        frame.setTitle("Hệ thống Quản lý Đặt bàn - Nhà hàng Hadi");
+        // THÊM: Chào mừng nhân viên đăng nhập
+        frame.setTitle("Hệ thống Quản lý Đặt bàn - Xin chào, " + nhanVienHienTai.getTenNhanVien());
         frame.setBounds(100, 100, 1280, 800);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null); 
@@ -90,7 +113,6 @@ public class ManHinhChinh {
         mnHeThong.setIcon(loadIcon("/img/menu/heThong.png"));
         menuBar.add(mnHeThong);
 
-        // SỬA LỖI 5: Khởi tạo mntmTrangChu (trước đây bị null)
         mntmTrangChu = new JMenuItem("Trang chủ");
         mntmTrangChu.setIcon(loadIcon("/img/menu/heThong.png")); // Bạn có thể đổi icon
         mnHeThong.add(mntmTrangChu);
@@ -112,7 +134,7 @@ public class ManHinhChinh {
         mntmKhachHang.setIcon(loadIcon("/img/menu/Customer.png"));
         mnDanhMuc.add(mntmKhachHang);
         JMenuItem mntmNhanVien = new JMenuItem("Nhân viên");
-        mntmNhanVien.setIcon(loadIcon("/img/menu/nhanVien.png"));
+        mntmNhanVien.setIcon(loadIcon("/img/menu/nhan-Vien.png"));
         mnDanhMuc.add(mntmNhanVien);
         JMenuItem mntmTaiKhoan = new JMenuItem("Tài khoản");
         mntmTaiKhoan.setIcon(loadIcon("/img/menu/themKhachHang.png"));
@@ -136,7 +158,7 @@ public class ManHinhChinh {
         mntmKhachHang2.setIcon(loadIcon("/img/menu/Customer.png"));
         mnTimKiem.add(mntmKhachHang2);
         JMenuItem mntmNhanVien2 = new JMenuItem("Nhân viên");
-        mntmNhanVien2.setIcon(loadIcon("/img/menu/nhanVien.png"));
+        mntmNhanVien2.setIcon(loadIcon("/img/menu/nhan-Vien.png"));
         mnTimKiem.add(mntmNhanVien2);
 
 
@@ -144,7 +166,6 @@ public class ManHinhChinh {
         mnXuLy.setIcon(loadIcon("/img/menu/xuLy.png"));
         menuBar.add(mnXuLy);
 
-        // SỬA LỖI 2: Gán vào field, không tạo biến local
         mntmDatBan = new JMenuItem("Đặt bàn"); 
         mntmDatBan.setIcon(loadIcon("/img/menu/Bell.png"));
         mnXuLy.add(mntmDatBan);
@@ -169,24 +190,22 @@ public class ManHinhChinh {
         mnThongKe.add(mntmMon);
 
         
-        // --- SỬA LỖI 3: NỘI DUNG CHÍNH (DÙNG CARDLAYOUT) ---
+        // --- NỘI DUNG CHÍNH (DÙNG CARDLAYOUT) ---
         
-        // 1. Tạo mainContentPane với CardLayout
         mainContentPane = new JPanel(new CardLayout());
-        frame.setContentPane(mainContentPane); // Set panel CardLayout làm nội dung chính
+        frame.setContentPane(mainContentPane); 
 
         // 2. Tạo Card 1: Màn hình Trang chủ (Ảnh nền)
         ImageIcon bgIcon = loadIcon("/img/bg/hadi-bg.png");
         panelTrangChu = new BackgroundImagePanel(bgIcon);
         mainContentPane.add(panelTrangChu, "TRANG_CHU"); // Thêm vào CardLayout
         
-        // Dùng GridBagLayout để căn giữa nội dung TRÊN panelTrangChu
         GridBagLayout gbl_contentPane = new GridBagLayout();
         gbl_contentPane.columnWidths = new int[]{1};
         gbl_contentPane.rowHeights = new int[]{0, 0, 0, 0};
         gbl_contentPane.columnWeights = new double[]{1.0};
         gbl_contentPane.rowWeights = new double[]{0.3, 0.0, 0.0, 0.7}; 
-        panelTrangChu.setLayout(gbl_contentPane); // Set layout cho panelTrangChu
+        panelTrangChu.setLayout(gbl_contentPane); 
 
         // --- TIÊU ĐỀ (Thêm vào panelTrangChu) ---
         JLabel lblTitle = new JLabel("HỆ THỐNG QUẢN LÝ ĐẶT BÀN");
@@ -262,8 +281,11 @@ public class ManHinhChinh {
         mntmDatBan.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (panelQuanLyDatBan == null) {
-                    // SỬA LỖI 1: Sai tên lớp
-                    panelQuanLyDatBan = new ManHinhQuanLyBan(); 
+                    
+                    // SỬA LỖI (Dòng 266 cũ): 
+                    // Truyền 'nhanVienHienTai' (đã được lưu khi khởi tạo) vào
+                    panelQuanLyDatBan = new ManHinhQuanLyBan(nhanVienHienTai); 
+                    
                     mainContentPane.add(panelQuanLyDatBan, "QUAN_LY_DAT_BAN");
                 } else {
                     panelQuanLyDatBan.loadDataBanAn();
@@ -283,7 +305,7 @@ public class ManHinhChinh {
         });
     }
 
-    // SỬA LỖI 6: Xóa dấu '}' thừa ở đây
+    // SỬA LỖI 6: Xóa dấu '}' thừa ở đây (Đã xóa)
 
     /**
      * LỚP CON (INNER CLASS) ĐỂ VẼ ẢNH NỀN

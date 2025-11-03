@@ -195,4 +195,53 @@ public class BanAn_dao implements DAOInterface<BanAn> {
         }
         return list;
     }
+    
+    public List<BanAn> getListByTrangThai(String trangThai) {
+        List<BanAn> list = new ArrayList<>();
+        String sql = """
+                SELECT b.maBanAn, b.tenBanAn, b.soChoNgoi, b.trangThai, b.loaiBan, b.ghiChu,
+                       kv.maKhuVuc, kv.tenKhuVuc, kv.soLuongBan, kv.sucChua, kv.dienTich,
+                       lkv.maLoaiKhuVuc, lkv.tenLoaiKhuVuc
+                FROM BanAn b
+                LEFT JOIN KhuVuc kv ON b.maKhuVuc = kv.maKhuVuc
+                LEFT JOIN LoaiKhuVuc lkv ON kv.maLoaiKhuVuc = lkv.maLoaiKhuVuc
+                WHERE b.trangThai = ?
+                ORDER BY b.maBanAn
+                """;
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setString(1, trangThai);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    LoaiKhuVuc loai = new LoaiKhuVuc(
+                            rs.getString("maLoaiKhuVuc"),
+                            rs.getString("tenLoaiKhuVuc")
+                    );
+                    KhuVuc kv = new KhuVuc(
+                            rs.getString("maKhuVuc"),
+                            rs.getString("tenKhuVuc"),
+                            rs.getInt("soLuongBan"),
+                            loai,
+                            rs.getInt("sucChua"),
+                            rs.getDouble("dienTich")
+                    );
+                    BanAn ba = new BanAn(
+                            rs.getString("maBanAn"),
+                            rs.getString("tenBanAn"),
+                            rs.getInt("soChoNgoi"),
+                            kv,
+                            rs.getString("trangThai"),
+                            rs.getString("loaiBan"),
+                            rs.getString("ghiChu")
+                    );
+                    list.add(ba);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
 }

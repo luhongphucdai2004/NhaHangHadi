@@ -17,27 +17,25 @@ public class ChiTietDonDatBan_dao implements DAOInterface<ChiTietDonDatBan> {
 
     @Override
     public int them(ChiTietDonDatBan ct) throws SQLException {
-        String sql = "INSERT INTO ChiTietDonDatBan(maDonDatBan, maBanAn, tienCoc, ghiChu) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO ChiTietDonDatBan(maDonDatBan, maBanAn, tienCoc) VALUES (?, ?, ?)";
         try (Connection con = ConnectDB.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, ct.getMaDonDatBan());
             ps.setString(2, ct.getMaBanAn());
             ps.setDouble(3, ct.getTienCoc());
-            ps.setString(4, ct.getGhiChu());
             return ps.executeUpdate();
         }
     }
 
     @Override
     public int capNhat(ChiTietDonDatBan ct) {
-        String sql = "UPDATE ChiTietDonDatBan SET tienCoc = ?, ghiChu = ? WHERE maDonDatBan = ? AND maBanAn = ?";
+        String sql = "UPDATE ChiTietDonDatBan SET tienCoc = ? WHERE maDonDatBan = ? AND maBanAn = ?";
         try (Connection con = ConnectDB.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setDouble(1, ct.getTienCoc());
-            ps.setString(2, ct.getGhiChu());
-            ps.setString(3, ct.getMaDonDatBan());
-            ps.setString(4, ct.getMaBanAn());
+            ps.setString(2, ct.getMaDonDatBan());
+            ps.setString(3, ct.getMaBanAn());
             return ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -80,8 +78,7 @@ public class ChiTietDonDatBan_dao implements DAOInterface<ChiTietDonDatBan> {
                 list.add(new ChiTietDonDatBan(
                         null, // Tạm để null DonDatBan
                         ban,
-                        rs.getDouble("tienCoc"),
-                        rs.getString("ghiChu")
+                        rs.getDouble("tienCoc")
                 ));
             }
         } catch (SQLException e) {
@@ -111,8 +108,7 @@ public class ChiTietDonDatBan_dao implements DAOInterface<ChiTietDonDatBan> {
                     return new ChiTietDonDatBan(
                             null, // Tạm để null DonDatBan
                             ban,
-                            rs.getDouble("tienCoc"),
-                            rs.getString("ghiChu")
+                            rs.getDouble("tienCoc")
                     );
                 }
             }
@@ -126,12 +122,11 @@ public class ChiTietDonDatBan_dao implements DAOInterface<ChiTietDonDatBan> {
 
     // Thêm (dùng connection có sẵn cho transaction)
     public int them(Connection con, ChiTietDonDatBan ct) throws SQLException {
-        String sql = "INSERT INTO ChiTietDonDatBan(maDonDatBan, maBanAn, tienCoc, ghiChu) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO ChiTietDonDatBan(maDonDatBan, maBanAn, tienCoc) VALUES (?, ?, ?)";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, ct.getMaDonDatBan());
             ps.setString(2, ct.getMaBanAn());
             ps.setDouble(3, ct.getTienCoc());
-            ps.setString(4, ct.getGhiChu());
             return ps.executeUpdate();
         }
     }
@@ -150,8 +145,7 @@ public class ChiTietDonDatBan_dao implements DAOInterface<ChiTietDonDatBan> {
                     list.add(new ChiTietDonDatBan(
                             null, // Tạm thời để null DonDatBan để tránh lặp
                             ban,
-                            rs.getDouble("tienCoc"),
-                            rs.getString("ghiChu")
+                            rs.getDouble("tienCoc")
                     ));
                 }
             }

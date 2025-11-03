@@ -4,15 +4,14 @@ public class ChiTietDonDatBan {
     private DonDatBan donDatBan;
     private BanAn banAn;
     private double tienCoc; // <-- TIỀN CỌC ĐÃ VỀ ĐÂY
-    private String ghiChu; 
 
     public ChiTietDonDatBan() {}
 
-    public ChiTietDonDatBan(DonDatBan donDatBan, BanAn banAn, double tienCoc, String ghiChu) {
+    public ChiTietDonDatBan(DonDatBan donDatBan, BanAn banAn, double tienCoc) {
         this.donDatBan = donDatBan;
         this.banAn = banAn;
         this.tienCoc = tienCoc;
-        this.ghiChu = ghiChu;
+
     }
     
     // ===== Getter - Setter =====
@@ -26,8 +25,6 @@ public class ChiTietDonDatBan {
     public double getTienCoc() { return tienCoc; }
     public void setTienCoc(double tienCoc) { this.tienCoc = tienCoc; }
     
-    public String getGhiChu() { return ghiChu; }
-    public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
 
     // ===== Phương thức tiện ích =====
     

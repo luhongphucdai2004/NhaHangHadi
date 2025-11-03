@@ -4,12 +4,11 @@ import entity.BanAn;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.Font; // SỬA: Đổi Font
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.BorderLayout;
-import java.awt.event.MouseAdapter;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,25 +34,27 @@ public class BanAnCard extends JPanel {
     public BanAnCard(BanAn banAn) {
         this.banAn = banAn;
         
-        // Tăng kích thước bàn từ 160x100 lên 200x130
         setPreferredSize(new Dimension(200, 130));
         setLayout(new BorderLayout(5, 5));
         setOpaque(false); // Để vẽ bo tròn
         setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         lblTenBan = new JLabel(banAn.getTenBanAn());
-        lblTenBan.setFont(new Font("Tahoma", Font.BOLD, 18));
+        // SỬA: Dùng "SansSerif"
+        lblTenBan.setFont(new Font("SansSerif", Font.BOLD, 18)); 
         lblTenBan.setHorizontalAlignment(SwingConstants.CENTER);
         lblTenBan.setBorder(BorderFactory.createEmptyBorder(8, 5, 0, 5));
         add(lblTenBan, BorderLayout.NORTH);
 
         lblTrangThai = new JLabel(banAn.getTrangThai());
-        lblTrangThai.setFont(new Font("Tahoma", Font.BOLD, 20));
+        // SỬA: Dùng "SansSerif"
+        lblTrangThai.setFont(new Font("SansSerif", Font.BOLD, 20)); 
         lblTrangThai.setHorizontalAlignment(SwingConstants.CENTER);
         add(lblTrangThai, BorderLayout.CENTER);
 
         lblChiTiet = new JLabel(banAn.getLoaiBan() + " - " + banAn.getSoChoNgoi() + " chỗ");
-        lblChiTiet.setFont(new Font("Tahoma", Font.ITALIC, 13));
+        // SỬA: Dùng "SansSerif"
+        lblChiTiet.setFont(new Font("SansSerif", Font.ITALIC, 13)); 
         lblChiTiet.setHorizontalAlignment(SwingConstants.CENTER);
         lblChiTiet.setBorder(BorderFactory.createEmptyBorder(0, 5, 8, 5));
         add(lblChiTiet, BorderLayout.SOUTH);
@@ -72,7 +73,7 @@ public class BanAnCard extends JPanel {
 
         // Vẽ viền khi được chọn
         if (isSelected) {
-            g2d.setColor(Color.BLACK);
+            g2d.setColor(Color.BLACK); 
             g2d.setStroke(new java.awt.BasicStroke(4));
             g2d.drawRoundRect(2, 2, getWidth() - 4, getHeight() - 4, 20, 20);
         } else {
@@ -82,11 +83,16 @@ public class BanAnCard extends JPanel {
         }
 
         g2d.dispose();
-        super.paintComponent(g);
+        
+        super.paintComponent(g); 
     }
 
     public BanAn getBanAn() {
         return banAn;
+    }
+
+    public boolean isSelected() {
+        return this.isSelected;
     }
 
     public void setTrangThai(String trangThai) {
@@ -110,9 +116,9 @@ public class BanAnCard extends JPanel {
                 currentBackgroundColor = COLOR_QUA_HAN;
                 setColors(COLOR_TEXT_LIGHT);
                 break;
-            default:
-                currentBackgroundColor = Color.LIGHT_GRAY;
-                setColors(COLOR_TEXT_DARK);
+            default: // Nếu nhận "Tr?ng" nó sẽ chạy vào đây
+            	currentBackgroundColor = COLOR_TRONG;
+                setColors(COLOR_TEXT_LIGHT);
                 break;
         }
         repaint();
@@ -126,10 +132,6 @@ public class BanAnCard extends JPanel {
 
     public void setSelected(boolean selected) {
         this.isSelected = selected;
-        repaint();
-    }
-
-    public void addMouseListener(MouseAdapter adapter) {
-        super.addMouseListener(adapter);
+        repaint(); 
     }
 }

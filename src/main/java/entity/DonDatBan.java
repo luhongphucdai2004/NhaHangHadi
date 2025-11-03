@@ -20,7 +20,14 @@ public class DonDatBan {
 
     
 
-    public DonDatBan(String maDonDatBan, KhachHang khachHang, NhanVien nhanVien, LocalDateTime ngayDat,
+    public DonDatBan(String maDonDatBan) {
+		super();
+		this.maDonDatBan = maDonDatBan;
+	}
+
+
+
+	public DonDatBan(String maDonDatBan, KhachHang khachHang, NhanVien nhanVien, LocalDateTime ngayDat,
 			LocalDateTime ngayTaoDon, LocalDateTime thoiGianCheckIn, List<ChiTietDonDatBan> dsChiTiet) {
 		super();
 		this.maDonDatBan = maDonDatBan;

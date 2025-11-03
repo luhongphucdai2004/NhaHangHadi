@@ -35,7 +35,12 @@ public class NhanVien {
     public NhanVien() {
     }
 
-    public NhanVien(String maNhanVien,
+    public NhanVien(String maNhanVien) {
+		super();
+		this.maNhanVien = maNhanVien;
+	}
+
+	public NhanVien(String maNhanVien,
                     String tenNhanVien,
                     String soDienThoai,
                     String email,

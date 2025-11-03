@@ -1,6 +1,5 @@
 package gui;
 
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -12,7 +11,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
-import java.net.URL; // <-- THÊM IMPORT NÀY
+import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -25,9 +24,24 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
+import java.awt.CardLayout; // Import cần thiết
+import java.awt.event.ActionEvent; // Import cần thiết
+import java.awt.event.ActionListener; // Import cần thiết
+
 public class ManHinhChinh {
 
     private JFrame frame;
+
+    // --- Quản lý các màn hình ---
+    private JPanel mainContentPane; // Panel chính dùng CardLayout
+    private BackgroundImagePanel panelTrangChu; // Màn hình chính (ảnh nền)
+    
+    // SỬA LỖI 1: Sai tên lớp. Tên đúng là ManHinhQuanLyDatBan_gui
+    private ManHinhQuanLyBan panelQuanLyDatBan; 
+
+    // Các biến field cho menu item
+    private JMenuItem mntmDatBan; 
+    private JMenuItem mntmTrangChu; 
 
     /**
      * Launch the application.
@@ -36,12 +50,11 @@ public class ManHinhChinh {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    // Sử dụng Look and Feel của hệ thống cho đẹp hơn
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
-                
+
                 try {
                     ManHinhChinh window = new ManHinhChinh();
                     window.frame.setVisible(true);
@@ -67,81 +80,79 @@ public class ManHinhChinh {
         frame.setTitle("Hệ thống Quản lý Đặt bàn - Nhà hàng Hadi");
         frame.setBounds(100, 100, 1280, 800);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null); // Hiển thị giữa màn hình
+        frame.setLocationRelativeTo(null); 
 
         // --- THANH MENU ---
         JMenuBar menuBar = new JMenuBar();
         frame.setJMenuBar(menuBar);
 
-        // SỬ DỤNG HÀM loadIcon AN TOÀN
         JMenu mnHeThong = new JMenu("Hệ thống");
         mnHeThong.setIcon(loadIcon("/img/menu/heThong.png"));
         menuBar.add(mnHeThong);
 
+        // SỬA LỖI 5: Khởi tạo mntmTrangChu (trước đây bị null)
+        mntmTrangChu = new JMenuItem("Trang chủ");
+        mntmTrangChu.setIcon(loadIcon("/img/menu/heThong.png")); // Bạn có thể đổi icon
+        mnHeThong.add(mntmTrangChu);
+
         JMenu mnDanhMuc = new JMenu("Danh mục");
         mnDanhMuc.setIcon(loadIcon("/img/menu/danhMuc.png"));
         menuBar.add(mnDanhMuc);
-
+        // ... (thêm các item cho Danh mục)
         JMenuItem mntmKhuVuc = new JMenuItem("Khu vực");
         mntmKhuVuc.setIcon(loadIcon("/img/menu/khuVuc.png"));
         mnDanhMuc.add(mntmKhuVuc);
-
         JMenuItem mntmBanAn = new JMenuItem("Bàn ăn");
         mntmBanAn.setIcon(loadIcon("/img/menu/table.png"));
         mnDanhMuc.add(mntmBanAn);
-
         JMenuItem mntmMonAn = new JMenuItem("Món ăn");
         mntmMonAn.setIcon(loadIcon("/img/menu/man.png"));
         mnDanhMuc.add(mntmMonAn);
-        
         JMenuItem mntmKhachHang = new JMenuItem("Khách hàng");
         mntmKhachHang.setIcon(loadIcon("/img/menu/Customer.png"));
         mnDanhMuc.add(mntmKhachHang);
-        
         JMenuItem mntmNhanVien = new JMenuItem("Nhân viên");
         mntmNhanVien.setIcon(loadIcon("/img/menu/nhanVien.png"));
         mnDanhMuc.add(mntmNhanVien);
-        
         JMenuItem mntmTaiKhoan = new JMenuItem("Tài khoản");
         mntmTaiKhoan.setIcon(loadIcon("/img/menu/themKhachHang.png"));
         mnDanhMuc.add(mntmTaiKhoan);
 
+
         JMenu mnTimKiem = new JMenu("Tìm kiếm");
         mnTimKiem.setIcon(loadIcon("/img/menu/find.png"));
         menuBar.add(mnTimKiem);
-        
+        // ... (thêm các item cho Tìm kiếm)
         JMenuItem mntmKhuVuc2 = new JMenuItem("Khu vực");
         mntmKhuVuc2.setIcon(loadIcon("/img/menu/khuVuc.png"));
         mnTimKiem.add(mntmKhuVuc2);
-
         JMenuItem mntmBanAn2 = new JMenuItem("Bàn ăn");
         mntmBanAn2.setIcon(loadIcon("/img/menu/table.png"));
         mnTimKiem.add(mntmBanAn2);
-
         JMenuItem mntmMonAn2 = new JMenuItem("Món ăn");
         mntmMonAn2.setIcon(loadIcon("/img/menu/man.png"));
         mnTimKiem.add(mntmMonAn2);
-        
         JMenuItem mntmKhachHang2 = new JMenuItem("Khách hàng");
         mntmKhachHang2.setIcon(loadIcon("/img/menu/Customer.png"));
         mnTimKiem.add(mntmKhachHang2);
-        
         JMenuItem mntmNhanVien2 = new JMenuItem("Nhân viên");
         mntmNhanVien2.setIcon(loadIcon("/img/menu/nhanVien.png"));
         mnTimKiem.add(mntmNhanVien2);
 
+
         JMenu mnXuLy = new JMenu("Xử lý");
         mnXuLy.setIcon(loadIcon("/img/menu/xuLy.png"));
         menuBar.add(mnXuLy);
-        
-        JMenuItem mntmDatBan = new JMenuItem("Đặt bàn");
+
+        // SỬA LỖI 2: Gán vào field, không tạo biến local
+        mntmDatBan = new JMenuItem("Đặt bàn"); 
         mntmDatBan.setIcon(loadIcon("/img/menu/Bell.png"));
         mnXuLy.add(mntmDatBan);
-        
+
         JMenuItem mntmThemMon = new JMenuItem("Thêm món");
         mntmThemMon.setIcon(loadIcon("/img/menu/datMon.png"));
         mnXuLy.add(mntmThemMon);
-        
+
         JMenuItem mntmLapHoaDon = new JMenuItem("Lập hóa đơn");
         mntmLapHoaDon.setIcon(loadIcon("/img/menu/hoadon.png"));
         mnXuLy.add(mntmLapHoaDon);
@@ -149,71 +160,73 @@ public class ManHinhChinh {
         JMenu mnThongKe = new JMenu("Thống kê");
         mnThongKe.setIcon(loadIcon("/img/menu/thongKe.png"));
         menuBar.add(mnThongKe);
-        
+        // ... (thêm các item cho Thống kê)
         JMenuItem mntmDoanhThu = new JMenuItem("Doanh thu");
         mntmDoanhThu.setIcon(loadIcon("/img/menu/doanhThu.png"));
         mnThongKe.add(mntmDoanhThu);
-        
         JMenuItem mntmMon = new JMenuItem("Món ăn");
-        // SỬA LỖI LOGIC: Gán icon cho mntmMon, không phải mntmDoanhThu
         mntmMon.setIcon(loadIcon("/img/menu/thongKeMonAn.png"));
         mnThongKe.add(mntmMon);
-        
-        
 
-        // --- NỘI DUNG CHÍNH (VỚI ẢNH NỀN) ---
-        // Sử dụng panel tùy chỉnh (lớp con) của chúng ta
-        ImageIcon bgIcon = loadIcon("/img/bg/hadi-bg.png");
-        BackgroundImagePanel contentPane = new BackgroundImagePanel(bgIcon);
-        frame.setContentPane(contentPane);
         
-        // Dùng GridBagLayout để căn giữa mọi thứ
+        // --- SỬA LỖI 3: NỘI DUNG CHÍNH (DÙNG CARDLAYOUT) ---
+        
+        // 1. Tạo mainContentPane với CardLayout
+        mainContentPane = new JPanel(new CardLayout());
+        frame.setContentPane(mainContentPane); // Set panel CardLayout làm nội dung chính
+
+        // 2. Tạo Card 1: Màn hình Trang chủ (Ảnh nền)
+        ImageIcon bgIcon = loadIcon("/img/bg/hadi-bg.png");
+        panelTrangChu = new BackgroundImagePanel(bgIcon);
+        mainContentPane.add(panelTrangChu, "TRANG_CHU"); // Thêm vào CardLayout
+        
+        // Dùng GridBagLayout để căn giữa nội dung TRÊN panelTrangChu
         GridBagLayout gbl_contentPane = new GridBagLayout();
         gbl_contentPane.columnWidths = new int[]{1};
         gbl_contentPane.rowHeights = new int[]{0, 0, 0, 0};
         gbl_contentPane.columnWeights = new double[]{1.0};
-        gbl_contentPane.rowWeights = new double[]{0.3, 0.0, 0.0, 0.7}; // 30% lề trên, 70% lề dưới
-        contentPane.setLayout(gbl_contentPane);
+        gbl_contentPane.rowWeights = new double[]{0.3, 0.0, 0.0, 0.7}; 
+        panelTrangChu.setLayout(gbl_contentPane); // Set layout cho panelTrangChu
 
-        // --- TIÊU ĐỀ ---
+        // --- TIÊU ĐỀ (Thêm vào panelTrangChu) ---
         JLabel lblTitle = new JLabel("HỆ THỐNG QUẢN LÝ ĐẶT BÀN");
         lblTitle.setForeground(Color.WHITE);
         lblTitle.setFont(new Font("Tahoma", Font.BOLD, 42));
         GridBagConstraints gbc_lblTitle = new GridBagConstraints();
         gbc_lblTitle.insets = new Insets(0, 0, 5, 0);
         gbc_lblTitle.gridx = 0;
-        gbc_lblTitle.gridy = 0; // Hàng đầu tiên
-        contentPane.add(lblTitle, gbc_lblTitle);
+        gbc_lblTitle.gridy = 0; 
+        panelTrangChu.add(lblTitle, gbc_lblTitle);
 
         JLabel lblSubtitle = new JLabel("Nhà hàng Hadi");
-        lblSubtitle.setForeground(new Color(220, 220, 220)); // Màu trắng xám
+        lblSubtitle.setForeground(new Color(220, 220, 220));
         lblSubtitle.setFont(new Font("Tahoma", Font.ITALIC, 28));
         GridBagConstraints gbc_lblSubtitle = new GridBagConstraints();
-        gbc_lblSubtitle.insets = new Insets(10, 0, 50, 0); // Cách xa tiêu đề
+        gbc_lblSubtitle.insets = new Insets(10, 0, 50, 0);
         gbc_lblSubtitle.gridx = 0;
-        gbc_lblSubtitle.gridy = 1; // Hàng thứ hai
-        contentPane.add(lblSubtitle, gbc_lblSubtitle);
+        gbc_lblSubtitle.gridy = 1; 
+        panelTrangChu.add(lblSubtitle, gbc_lblSubtitle);
 
-        // --- PANEL CHỨA CÁC NÚT BẤM CHÍNH ---
+        // --- PANEL NÚT BẤM (Thêm vào panelTrangChu) ---
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setOpaque(false); // Quan trọng: Làm cho panel trong suốt
+        buttonPanel.setOpaque(false); 
         FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
-        flowLayout.setHgap(40); // Khoảng cách ngang giữa các nút
+        flowLayout.setHgap(40); 
         flowLayout.setVgap(20);
-        
+
         GridBagConstraints gbc_buttonPanel = new GridBagConstraints();
         gbc_buttonPanel.gridx = 0;
-        gbc_buttonPanel.gridy = 2; // Hàng thứ ba
-        contentPane.add(buttonPanel, gbc_buttonPanel);
+        gbc_buttonPanel.gridy = 2; 
+        panelTrangChu.add(buttonPanel, gbc_buttonPanel);
 
-        // --- CÁC NÚT BẤM CHÍNH ---
+        // --- CÁC NÚT BẤM CHÍNH (Thêm vào buttonPanel) ---
         JButton btnKhuVuc = new JButton("Khu vực");
         btnKhuVuc.setPreferredSize(new Dimension(160, 140));
         btnKhuVuc.setVerticalTextPosition(SwingConstants.BOTTOM);
         btnKhuVuc.setHorizontalTextPosition(SwingConstants.CENTER);
         btnKhuVuc.setFont(new Font("Tahoma", Font.BOLD, 18));
         btnKhuVuc.setIcon(loadIcon("/img/menu/khuVuc.png"));
-        btnKhuVuc.setBackground(new Color(255, 255, 255, 180)); // Trắng hơi trong suốt
+        btnKhuVuc.setBackground(new Color(255, 255, 255, 180)); 
         buttonPanel.add(btnKhuVuc);
 
         JButton btnBanAn = new JButton("Bàn ăn");
@@ -242,38 +255,53 @@ public class ManHinhChinh {
         btnKhachHang.setIcon(loadIcon("/img/menu/Customer.png"));
         btnKhachHang.setBackground(new Color(255, 255, 255, 180));
         buttonPanel.add(btnKhachHang);
+
+        // --- THÊM SỰ KIỆN CHO MENU (Đã sửa) ---
+        
+        // Sự kiện click "Đặt bàn"
+        mntmDatBan.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (panelQuanLyDatBan == null) {
+                    // SỬA LỖI 1: Sai tên lớp
+                    panelQuanLyDatBan = new ManHinhQuanLyBan(); 
+                    mainContentPane.add(panelQuanLyDatBan, "QUAN_LY_DAT_BAN");
+                } else {
+                    panelQuanLyDatBan.loadDataBanAn();
+                }
+
+                CardLayout cl = (CardLayout) (mainContentPane.getLayout());
+                cl.show(mainContentPane, "QUAN_LY_DAT_BAN");
+            }
+        });
+
+        // Sự kiện click "Trang chủ"
+        mntmTrangChu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                CardLayout cl = (CardLayout) (mainContentPane.getLayout());
+                cl.show(mainContentPane, "TRANG_CHU");
+            }
+        });
     }
-    
-    
+
+    // SỬA LỖI 6: Xóa dấu '}' thừa ở đây
+
     /**
      * LỚP CON (INNER CLASS) ĐỂ VẼ ẢNH NỀN
-     * Một JPanel tùy chỉnh có khả năng vẽ một ảnh nền
-     * Ảnh sẽ được co giãn để vừa với kích thước của panel.
+     * (Giữ nguyên code này)
      */
     class BackgroundImagePanel extends JPanel {
 
         private Image backgroundImage;
 
-        /**
-         * Constructor mặc định (cần cho WindowBuilder).
-         */
         public BackgroundImagePanel() {
             super();
         }
 
-        /**
-         * Constructor để truyền ảnh vào.
-         * @param image
-         */
         public BackgroundImagePanel(Image image) {
             super();
             this.backgroundImage = image;
         }
-        
-        /**
-         * Constructor để truyền ImageIcon vào.
-         * @param icon
-         */
+
         public BackgroundImagePanel(ImageIcon icon) {
             super();
             if (icon != null) {
@@ -281,41 +309,29 @@ public class ManHinhChinh {
             }
         }
 
-        /**
-         * Thiết lập ảnh nền
-         * @param image
-         */
         public void setBackgroundImage(Image image) {
             this.backgroundImage = image;
-            this.repaint(); // Vẽ lại panel khi có ảnh mới
+            this.repaint(); 
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            // Vẽ ảnh nền
             if (backgroundImage != null) {
-                // Vẽ ảnh sao cho nó vừa với kích thước của panel
                 g.drawImage(backgroundImage, 0, 0, this.getWidth(), this.getHeight(), this);
             }
         }
     }
-    
-    // --- HÀM TRỢ GIÚP MỚI ĐỂ TẢI ICON AN TOÀN ---
-    /**
-     * Tải một ImageIcon từ đường dẫn resource.
-     * Trả về null nếu không tìm thấy resource thay vì ném NullPointerException.
-     * @param path Đường dẫn đến resource (ví dụ: "/img/menu/icon.png")
-     * @return ImageIcon hoặc null
-     */
+
+    // --- HÀM TRỢ GIÚP TẢI ICON AN TOÀN ---
+    // (Giữ nguyên code này)
     private ImageIcon loadIcon(String path) {
         URL imgURL = ManHinhChinh.class.getResource(path);
         if (imgURL != null) {
             return new ImageIcon(imgURL);
         } else {
-            // In ra lỗi để dễ dàng gỡ rối
             System.err.println("Couldn't find file: " + path);
-            return null; // Trả về null, không bị crash
+            return null; 
         }
     }
 }

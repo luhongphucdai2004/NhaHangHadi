@@ -14,7 +14,16 @@ public class BanAn {
     // ===== Constructors =====
     public BanAn() {}
 
-    public BanAn(String maBanAn, String tenBanAn, int soChoNgoi, KhuVuc khuVuc, String trangThai, String loaiBan, String ghiChu) {
+    
+    
+    public BanAn(String maBanAn) {
+		super();
+		this.maBanAn = maBanAn;
+	}
+
+
+
+	public BanAn(String maBanAn, String tenBanAn, int soChoNgoi, KhuVuc khuVuc, String trangThai, String loaiBan, String ghiChu) {
         this.maBanAn = maBanAn;
         this.tenBanAn = tenBanAn;
         this.soChoNgoi = soChoNgoi;
